@@ -35,10 +35,9 @@ public class CardResponseDTO {
 
     private String valid;
     private String cardType;
-    private String cardType;
+    private String message;
 
-    public CardResponseDTO() {
-    }
+    public CardResponseDTO() {}
 
     public CardResponseDTO(String valid, String cardType, String message) {
         this.valid = valid;
