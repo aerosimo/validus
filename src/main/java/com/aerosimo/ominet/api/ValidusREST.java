@@ -51,7 +51,7 @@ public class ValidusREST {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response validatecard(CardRequestDTO req) {
         CardResponseDTO dto = AuthLayer.validate(req.getCardNumber());
-        log.info("Credit card number {}, was validated and result was 1. Validity: {}  Issuing Network {} and message {} ", req.getCardNumber(),dto.getValid(),dto.getCardType(),dto.getMessage());
+        log.info("Validated card {} → valid: {}, network: {}, message: {} ", req.getCardNumber(),dto.getValid(),dto.getCardType(),dto.getMessage());
         return Response.ok(new CardResponseDTO(dto.getValid(),dto.getCardType(),dto.getMessage())).build();
     }
 }
