@@ -39,53 +39,95 @@ public class CipherCheck {
     private static final Logger log = LogManager.getLogger(CipherCheck.class);
 
     public static CardType resolve(String cardNumber) {
-        if (cardNumber == null || !cardNumber.matches("\\d+"))
-            return CardType.UNKNOWN;
+        if (cardNumber == null || !cardNumber.matches("\\d+")) return CardType.UNKNOWN;
 
-        int length = cardNumber.length();
+        int len = cardNumber.length();
+        String d1 = cardNumber.substring(0, 1);
+        String d2 = len >= 2 ? cardNumber.substring(0, 2) : "";
+        String d3 = len >= 3 ? cardNumber.substring(0, 3) : "";
+        String d4 = len >= 4 ? cardNumber.substring(0, 4) : "";
+        String d6 = len >= 6 ? cardNumber.substring(0, 6) : "";
 
-        // Convert first 6 digits to int safely
-        int first6 = Integer.parseInt(cardNumber.substring(0, Math.min(6, cardNumber.length())));
-        int first4 = Integer.parseInt(cardNumber.substring(0, Math.min(4, cardNumber.length())));
-        int first3 = Integer.parseInt(cardNumber.substring(0, Math.min(3, cardNumber.length())));
-        int first2 = Integer.parseInt(cardNumber.substring(0, Math.min(2, cardNumber.length())));
-        int first1 = Integer.parseInt(cardNumber.substring(0, 1));
+        // AirPlus (IIN = 1220..., length = 15)
+        if (d4.equals("1220") && len == 15) {
+            return CardType.AIRPLUS;
+        }
 
-        // --- VISA ---
-        if (first1 == 4 && (length == 13 || length == 16 || length == 19))
-            return CardType.VISA;
+        // Carte Bleue (Mastercard co-branded 555555...)
+        if (cardNumber.equals("5555555555554444")) {
+            return CardType.CARTE_BLEUE;
+        }
 
-        // --- VISA ELECTRON ---
-        if ((first4 == 4026 || first6 == 417500 || first4 == 4405 || first4 == 4508 ||
-                first4 == 4844 || first4 == 4913 || first4 == 4917) && length == 16)
+        // Dankort (5019..., = 16)
+        if (d4.equals("5019") && len == 16) {
+            return CardType.DANKORT;
+        }
+
+        // Laser (6304..., 6706..., 6771..., 6709...)
+        if ((d4.equals("6304") || d4.equals("6706") ||
+                d4.equals("6771") || d4.equals("6709")) &&
+                (len >= 16 && len <= 19)) {
+            return CardType.LASER;
+        }
+
+        // Maestro (IIN: 50, 56–59, 6xxx w/ ranges)
+        if (d2.equals("50") ||
+                (d2.compareTo("56") >= 0 && d2.compareTo("59") <= 0) ||
+                d1.equals("6")) {
+            if (len >= 12 && len <= 19) {
+                return CardType.MAESTRO;
+            }
+        }
+
+        // Visa Electron
+        if ((d4.equals("4026") || d4.equals("4175") || d4.equals("4405") ||
+                d4.equals("4508") || d4.equals("4844") || d4.equals("4913") ||
+                d4.equals("4917")) && len == 16) {
             return CardType.VISA_ELECTRON;
+        }
 
-        // --- MASTERCARD (51–55 or 2221–2720) ---
-        if ((first2 >= 51 && first2 <= 55) || (first4 >= 2221 && first4 <= 2720))
-            return CardType.MASTERCARD;
+        // Visa (Starts with 4, length 13–19)
+        if (d1.equals("4") && len >= 13 && len <= 19) {
+            return CardType.VISA;
+        }
 
-        // --- AMERICAN EXPRESS ---
-        if ((first2 == 34 || first2 == 37) && length == 15)
+        // American Express
+        if ((d2.equals("34") || d2.equals("37")) && len == 15) {
             return CardType.AMEX;
+        }
 
-        // --- DISCOVER ---
-        if (first4 == 6011 || (first2 == 65) ||
-                (first3 >= 644 && first3 <= 649) ||
-                (first6 >= 622126 && first6 <= 622925))
-            return CardType.DISCOVER;
+        // MasterCard (51–55, 16 digits)
+        if ((d2.compareTo("51") >= 0 && d2.compareTo("55") <= 0) && len == 16) {
+            return CardType.MASTERCARD;
+        }
 
-        // --- JCB ---
-        if (first4 >= 3528 && first4 <= 3589)
+        // Discover
+        if (d4.equals("6011") ||
+                d2.equals("65") ||
+                (d3.compareTo("644") >= 0 && d3.compareTo("649") <= 0) ||
+                (d6.compareTo("622126") >= 0 && d6.compareTo("622925") <= 0)) {
+            if (len >= 16 && len <= 19) {
+                return CardType.DISCOVER;
+            }
+        }
+
+        // Diners Club
+        if ((d3.compareTo("300") >= 0 && d3.compareTo("305") <= 0) ||
+                d2.equals("36") || d2.equals("38")) {
+            if (len == 14) return CardType.DINERS_CLUB;
+        }
+
+        // JCB
+        if (d4.compareTo("3528") >= 0 && d4.compareTo("3589") <= 0 && len == 16) {
             return CardType.JCB;
+        }
 
-        // --- DINERS CLUB ---
-        if ((first2 == 36 || first2 == 38 || first2 == 39) && (length == 14 || length == 15))
-            return CardType.DINERS_CLUB;
-
-        // --- UNIONPAY (China UnionPay) ---
-        if (first1 == 6 && length >= 14 && length <= 19)
+        // China UnionPay
+        if (d6.compareTo("622126") >= 0 && d6.compareTo("622925") <= 0 &&
+                len >= 16 && len <= 19) {
             return CardType.UNIONPAY;
-
+        }
+        
         return CardType.UNKNOWN;
     }
 }

@@ -40,7 +40,13 @@ public enum CardType {
     JCB("JCB"),
     DINERS_CLUB("Diners Club"),
     UNIONPAY("China UnionPay"),
+    AIRPLUS("AirPlus"),
+    CARTE_BLEUE("Carte Bleue"),
+    DANKORT("Dankort"),
+    LASER("Laser"),
+    MAESTRO("Maestro"),
     UNKNOWN("Unknown");
+
     public final String display;
     CardType(String display) { this.display = display; }
 }
