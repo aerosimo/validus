@@ -127,7 +127,7 @@ public class CipherCheck {
                 len >= 16 && len <= 19) {
             return CardType.UNIONPAY;
         }
-        
+
         return CardType.UNKNOWN;
     }
 }
